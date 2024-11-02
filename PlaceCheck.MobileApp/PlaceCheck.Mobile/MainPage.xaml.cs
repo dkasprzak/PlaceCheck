@@ -1,9 +1,10 @@
-﻿namespace PlaceCheck.Mobile;
-
-public partial class MainPage : ContentPage
+﻿namespace PlaceCheck.Mobile
 {
-	public MainPage()
-	{
-		InitializeComponent();
-	}
+    public partial class MainPage : ContentPage
+    {
+        public MainPage()
+        {
+            InitializeComponent();
+        }
+    }
 }
