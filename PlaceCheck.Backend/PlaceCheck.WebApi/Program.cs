@@ -1,3 +1,6 @@
+using PlaceCheck.Application;
+using PlaceCheck.Infrastructure;
+using PlaceCheck.WebApi.Middlewares;
 using Serilog;
 
 var APP_NAME = "PlaceCheck.WebApi";
@@ -11,6 +14,11 @@ Log.Logger = new LoggerConfiguration()
 
 var builder = WebApplication.CreateBuilder(args);
 
+if (builder.Environment.IsDevelopment())
+{
+    builder.Configuration.AddJsonFile("appsettings.Development.local.json");
+}
+
 builder.Host.UseSerilog((context, services, configuration) => configuration
     .Enrich.WithProperty("Application", APP_NAME)
     .Enrich.WithProperty("MachineName", Environment.MachineName)
@@ -19,6 +27,8 @@ builder.Host.UseSerilog((context, services, configuration) => configuration
     .Enrich.FromLogContext());
 
 // Add services to the container.
+builder.Services.AddInfrastructure(builder.Configuration);
+builder.Services.AddApplication();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 
@@ -36,6 +46,8 @@ builder.Services.AddSwaggerGen(o =>
     });
 });
 var app = builder.Build();
+
+app.UseExceptionResultMiddleware();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

@@ -11,6 +11,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PlaceCheck.Domain", "PlaceC
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PlaceCheck.Infrastructure", "PlaceCheck.Infrastructure\PlaceCheck.Infrastructure.csproj", "{D13246FE-76E5-49CD-A029-F297278D1A35}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "PlaceCheck.Tests", "PlaceCheck.Tests", "{078C4933-7659-47B7-B0D7-938F8C311614}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PlaceCheck.Tests.Unit", "PlaceCheck.Tests.Unit\PlaceCheck.Tests.Unit.csproj", "{A2023967-85BF-4503-862A-1DEC902A4655}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -36,5 +40,12 @@ Global
 		{D13246FE-76E5-49CD-A029-F297278D1A35}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D13246FE-76E5-49CD-A029-F297278D1A35}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D13246FE-76E5-49CD-A029-F297278D1A35}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A2023967-85BF-4503-862A-1DEC902A4655}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A2023967-85BF-4503-862A-1DEC902A4655}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A2023967-85BF-4503-862A-1DEC902A4655}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A2023967-85BF-4503-862A-1DEC902A4655}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{A2023967-85BF-4503-862A-1DEC902A4655} = {078C4933-7659-47B7-B0D7-938F8C311614}
 	EndGlobalSection
 EndGlobal
