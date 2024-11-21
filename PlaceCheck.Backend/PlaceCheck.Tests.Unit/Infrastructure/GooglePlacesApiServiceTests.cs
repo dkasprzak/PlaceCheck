@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Options;
 using NSubstitute;
 using PlaceCheck.Infrastructure.GooglePlacesApi;
+using PlaceCheck.Infrastructure.GooglePlacesApi.Services;
 
 namespace PlaceCheck.Tests.Unit.Infrastructure;
 

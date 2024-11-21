@@ -1,5 +1,4 @@
 ﻿using System.Net;
-using System.Runtime.InteropServices.JavaScript;
 using PlaceCheck.Application.Exceptions;
 using PlaceCheck.WebApi.Application.Responses;
 
@@ -29,6 +28,12 @@ public class ExceptionResultMiddleware
         {
             httpContext.Response.StatusCode = (int)HttpStatusCode.NotFound;
             await httpContext.Response.WriteAsJsonAsync(new NotFoundResponse { Message = e.Message });
+        }
+        catch (ApiException e)
+        {
+            logger.LogWarning($"API returned error: {e.StatusCode} - {e.ErrorContent}");
+            httpContext.Response.StatusCode = (int)e.StatusCode;
+            await httpContext.Response.WriteAsJsonAsync(e.ErrorContent);
         }
         catch (Exception e)
         {

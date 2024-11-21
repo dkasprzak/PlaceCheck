@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using PlaceCheck.Application.Interfaces;
+using PlaceCheck.Infrastructure.GooglePlacesApi.Services;
 
 namespace PlaceCheck.Infrastructure.GooglePlacesApi;
 
