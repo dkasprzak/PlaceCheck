@@ -400,3 +400,4 @@ FodyWeavers.xsd
 # JetBrains Rider
 *.sln.iml
 /PlaceCheck.Backend/PlaceCheck.WebApi/appsettings.Development.local.json
+/PlaceCheck.Backend/test.appsettings.json

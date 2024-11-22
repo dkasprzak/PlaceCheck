@@ -22,8 +22,8 @@ public class GooglePlacesApiService : IGooglePlacesApiService
 
     public async Task<IEnumerable<PlaceResponse>> SearchPlaces(string query)
     {
-        var sufix = "places:searchText";
-        var request = await _httpClient.PostAsJsonAsync($"{_apiOptions.BaseUrl}/{sufix}", query);
+        var endpoint = $"{_apiOptions.BaseUrl}/places:searchText";
+        var request = await _httpClient.PostAsJsonAsync(endpoint, new SearchText(query));
 
         if (!request.IsSuccessStatusCode)
         {
@@ -37,4 +37,6 @@ public class GooglePlacesApiService : IGooglePlacesApiService
         
         return result.Places;
     }
+
+    record SearchText(string textQuery);
 }

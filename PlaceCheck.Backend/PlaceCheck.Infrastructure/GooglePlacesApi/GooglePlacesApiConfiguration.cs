@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using System.Net.Http.Headers;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using PlaceCheck.Application.Interfaces;
 using PlaceCheck.Infrastructure.GooglePlacesApi.Services;
@@ -14,7 +15,10 @@ public static class GooglePlacesApiConfiguration
         {
             var options = configuration.GetSection("ApiClients:GooglePlacesApi").Get<GooglePlacesApiOptions>();
             client.BaseAddress = new Uri(options.BaseUrl);
+            client.DefaultRequestHeaders.Accept.Clear();
+            client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             client.DefaultRequestHeaders.Add("X-Goog-Api-Key", options.ApiKey);
+            client.DefaultRequestHeaders.Add("X-Goog-FieldMask", "*");
         });
         
         return services;
