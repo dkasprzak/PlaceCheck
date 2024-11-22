@@ -1,4 +1,23 @@
-﻿@page "/"
+﻿@using PlaceCheck.Mobile.Application.Interfaces
+@using PlaceCheck.Mobile.Application.ViewModels
+
+@inject IPlaceCheckApiService _placeCheckApiService
+
+@page "/"
+
 
 <h1>Hello, world!</h1>
 
+@foreach (var p in places)
+{
+    <p>@p.DisplayName.Text</p>
+}
+
+@code{
+    private IEnumerable<PlaceViewModel> places = Enumerable.Empty<PlaceViewModel>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        places = await _placeCheckApiService.GetPlaces("Kawiarnia Kraków") ?? Enumerable.Empty<PlaceViewModel>();
+    }
+}

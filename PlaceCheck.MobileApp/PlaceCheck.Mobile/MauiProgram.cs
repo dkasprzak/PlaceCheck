@@ -1,5 +1,8 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using MudBlazor.Services;
+using PlaceCheck.Mobile.Application;
+using PlaceCheck.Mobile.Infrastructure;
 
 namespace PlaceCheck.Mobile
 {
@@ -8,6 +11,9 @@ namespace PlaceCheck.Mobile
         public static MauiApp CreateMauiApp()
         {
             var builder = MauiApp.CreateBuilder();
+
+            builder.Configuration.AddJsonFile("appsettings.json");
+
             builder
                 .UseMauiApp<App>()
                 .ConfigureFonts(fonts =>
@@ -17,6 +23,8 @@ namespace PlaceCheck.Mobile
 
             builder.Services.AddMauiBlazorWebView();
             builder.Services.AddMudServices();
+            builder.Services.AddInfrastructure(builder.Configuration);
+            builder.Services.AddApplication();
 
 #if DEBUG
             builder.Services.AddBlazorWebViewDeveloperTools();
