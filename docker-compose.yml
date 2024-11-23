@@ -5,7 +5,7 @@ services:
     image: domin82/place-check-backend:latest
     environment:
       ApiClients__GooglePlacesApi__BaseUrl: "https://places.googleapis.com/v1"
-      ApiClients__GooglePlacesApi__ApiKey: "AIzaSyAEcOoHD_O0mxbKjlIaR6gF45Onw6uJ33g"
+      ApiClients__GooglePlacesApi__ApiKey: ""
     ports:
       - "5000:8080"
     networks:
