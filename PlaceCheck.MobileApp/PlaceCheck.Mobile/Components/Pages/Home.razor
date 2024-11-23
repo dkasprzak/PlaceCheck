@@ -1,23 +1,65 @@
 ﻿@using PlaceCheck.Mobile.Application.Interfaces
 @using PlaceCheck.Mobile.Application.ViewModels
-
+@using PlaceCheck.Mobile.Components.CustomComponets
 @inject IPlaceCheckApiService _placeCheckApiService
 
 @page "/"
 
+<MudPaper Class="pa-2 d-flex align-center" Elevation="3">
+    <MudTextField T="string" Label="Search Places"
+                  @bind-Value="_query"
+                  Variant="Variant.Filled"
+                  Adornment="Adornment.Start"
+                  AdornmentIcon="@Icons.Material.Filled.Search"
+                  Immediate="true"
+                  OnKeyDown="HandleKeyDown"
+                  Class="flex-grow-1" />
+    <MudIconButton Icon="@Icons.Material.Filled.Search"
+                   Color="Color.Primary"
+                   OnClick="PerformSearch"
+                   Edge="Edge.End" />
+</MudPaper>
 
-<h1>Hello, world!</h1>
-
-@foreach (var p in places)
-{
-    <p>@p.DisplayName.Text</p>
-}
-
-@code{
-    private IEnumerable<PlaceViewModel> places = Enumerable.Empty<PlaceViewModel>();
-
-    protected override async Task OnInitializedAsync()
+    @if (loading)
     {
-        places = await _placeCheckApiService.GetPlaces("Kawiarnia Kraków") ?? Enumerable.Empty<PlaceViewModel>();
+        <PlaceSkeletonLoader/>
+    }
+    else
+    {
+        @foreach (var p in places)
+        {
+            <PlaceSkeleton DisplayName="@p.DisplayName.Text"/>
+        }
+    }
+
+@code {
+private IEnumerable<PlaceListViewModel> places = Enumerable.Empty<PlaceListViewModel>();
+private string _query;
+private bool loading = false;
+
+    private async Task PerformSearch()
+    {
+        if (!string.IsNullOrWhiteSpace(_query))
+        {
+            loading = true;
+            StateHasChanged();
+
+            places = await _placeCheckApiService.GetPlaces(_query);
+
+            loading = false;
+            StateHasChanged();
+        }
+        else
+        {
+            places = Enumerable.Empty<PlaceListViewModel>();
+        }
+    }
+
+    private async Task HandleKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+        await PerformSearch();
+        }
     }
 }

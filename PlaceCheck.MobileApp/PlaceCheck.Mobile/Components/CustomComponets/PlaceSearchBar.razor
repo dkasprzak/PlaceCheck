@@ -1,0 +1,39 @@
+﻿@using System.ComponentModel.DataAnnotations
+@using PlaceCheck.Mobile.Application.ViewModels
+
+<MudAutocomplete T="string" Label="Search Places"
+                 @bind-Value="Query"
+                 SearchFunc="SearchFuncWrapper"
+                 ResetValueOnEmptyText="true"
+                 AdornmentIcon="@Icons.Material.Filled.Search"
+                 AdornmentColor="Color.Primary"
+                 Clearable="true" />
+
+
+@code {
+    private IEnumerable<PlaceListViewModel> Places = Enumerable.Empty<PlaceListViewModel>();
+    
+    [Parameter]
+    [Required]
+    public string Query { get; set; }
+    [Parameter]
+    public Func<string, Task<IEnumerable<PlaceListViewModel>>> SearchFunc { get; set; }
+    private async Task<IEnumerable<string>> SearchFuncWrapper(string value)
+    {
+        if (SearchFunc == null) return Enumerable.Empty<string>();
+
+        Places = await SearchFunc.Invoke(value);
+
+        return Places.Select(p => p.DisplayName.Text);
+    }
+
+    private async Task<IEnumerable<string>> SearchFuncWrapper(string value, CancellationToken cancellationToken)
+    {
+        if (SearchFunc == null) return Enumerable.Empty<string>();
+
+        Places = await SearchFunc.Invoke(value);
+
+        return Places.Select(p => p.DisplayName.Text);    
+    }
+
+}

@@ -9,6 +9,6 @@ namespace PlaceCheck.Mobile.Application.Interfaces
 {
     public interface IPlaceCheckApiService
     {
-        Task<IEnumerable<PlaceViewModel>> GetPlaces(string query);
+        Task<IEnumerable<PlaceListViewModel>> GetPlaces(string query);
     }
 }

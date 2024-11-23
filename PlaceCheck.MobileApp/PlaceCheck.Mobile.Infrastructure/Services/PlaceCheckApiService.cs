@@ -23,14 +23,14 @@ namespace PlaceCheck.Mobile.Infrastructure.Services
             _apiOptions = apiOptions.Value;
         }
 
-        public async Task<IEnumerable<PlaceViewModel>> GetPlaces(string query)
+        public async Task<IEnumerable<PlaceListViewModel>> GetPlaces(string query)
         {
             var endpoint = $"{_apiOptions.BaseUrl}/GetPlaces?query={query}";
 
             var request = await _httpClient.PostAsJsonAsync(endpoint, query);
 
             var content = await request.Content.ReadAsStringAsync();
-            var result = JsonConvert.DeserializeObject<IEnumerable<PlaceViewModel>>(content);
+            var result = JsonConvert.DeserializeObject<IEnumerable<PlaceListViewModel>>(content);
 
             return result;
         }

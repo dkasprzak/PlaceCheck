@@ -1,0 +1,21 @@
+﻿@using System.ComponentModel.DataAnnotations
+<MudCard>
+    <MudCardHeader>
+        <CardHeaderAvatar>
+            <MudAvatar Color="Color.Success">@DisplayName.ToUpper().Substring(0, 1)</MudAvatar>
+        </CardHeaderAvatar>
+        <CardHeaderContent>
+            <MudText Typo="Typo.body1">@DisplayName</MudText>
+            <RatingComponent RatingValue="@Rating"></RatingComponent>
+        </CardHeaderContent>
+    </MudCardHeader>
+</MudCard>
+
+@code {
+    [Required] 
+    [Parameter] 
+    public string DisplayName { get; set; }
+
+    [Parameter]
+    public double Rating { get; set; }
+}
