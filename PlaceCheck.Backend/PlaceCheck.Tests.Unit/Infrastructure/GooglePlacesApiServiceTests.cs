@@ -1,6 +1,7 @@
 ﻿using System.Net;
 using Microsoft.Extensions.Options;
 using NSubstitute;
+using PlaceCheck.Application.Logic.SearchedPlaceFunctions;
 using PlaceCheck.Infrastructure.GooglePlacesApi;
 using PlaceCheck.Infrastructure.GooglePlacesApi.Services;
 
@@ -11,6 +12,7 @@ public class GooglePlacesApiServiceTests
     private readonly HttpClient _httpClient;
     private readonly GooglePlacesApiService _service;
     private readonly IOptions<GooglePlacesApiOptions> _apiOptions;
+    private readonly SearchedPlaceService _searchedPlaceService;
 
     public GooglePlacesApiServiceTests()
     {
@@ -31,7 +33,7 @@ public class GooglePlacesApiServiceTests
         };
 
         // initialize service
-        _service = new GooglePlacesApiService(_httpClient, _apiOptions);
+        _service = new GooglePlacesApiService(_httpClient, _apiOptions, _searchedPlaceService);
     }
     
 }

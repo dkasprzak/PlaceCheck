@@ -11,12 +11,14 @@ namespace PlaceCheck.Infrastructure.GooglePlacesApi.Services;
 public class GooglePlacesApiService : IGooglePlacesApiService
 {
     private readonly HttpClient _httpClient;
+    private readonly ISearchedPlaceService _searchedPlaceService;
     private readonly GooglePlacesApiOptions _apiOptions;
     
-    public GooglePlacesApiService(HttpClient httpClient, IOptions<GooglePlacesApiOptions> apiOptions)
+    public GooglePlacesApiService(HttpClient httpClient, IOptions<GooglePlacesApiOptions> apiOptions, ISearchedPlaceService searchedPlaceService)
     {
         _httpClient = httpClient;
         _apiOptions = apiOptions.Value;
+        _searchedPlaceService = searchedPlaceService;
     }
 
 
@@ -34,6 +36,7 @@ public class GooglePlacesApiService : IGooglePlacesApiService
         
         var content = await request.Content.ReadAsStringAsync();
         var result = JsonConvert.DeserializeObject<PlaceResult>(content);
+        await _searchedPlaceService.SaveSearchedPlaceAsync(query);
         
         return result.Places;
     }
