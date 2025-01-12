@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using PlaceCheck.Application.Interfaces;
+using PlaceCheck.Application.Logic.SearchedPlaceFunctions.Queries;
 
 namespace PlaceCheck.WebApi.Controllers;
 
@@ -7,17 +8,17 @@ namespace PlaceCheck.WebApi.Controllers;
 [Route("[action]")]
 public class PlacesController : ControllerBase
 {
-    private readonly IGooglePlacesApiService _api;
+    private readonly IPlaceQueryService _placeQueryService;
 
-    public PlacesController(IGooglePlacesApiService api)
+    public PlacesController(IPlaceQueryService placeQueryService)
     {
-        _api = api;
+        _placeQueryService = placeQueryService;
     }
     
     [HttpPost]
-    public async Task<ActionResult> GetPlaces([FromQuery] string query)
+    public async Task<ActionResult> GetPlaces([FromBody] SearchQuery command)
     {
-        var result = await _api.SearchPlaces(query);
+        var result = await _placeQueryService.SearchPlaces(command);
         return Ok(result);
     }
 }
