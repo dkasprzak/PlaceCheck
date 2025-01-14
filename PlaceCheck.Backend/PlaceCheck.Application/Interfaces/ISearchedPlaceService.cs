@@ -2,5 +2,5 @@
 
 public interface ISearchedPlaceService
 {
-    Task<Guid> SaveSearchedPlaceAsync(string phase);
+    Task<Guid> SaveSearchedPlaceAsync(string phase, string city);
 }

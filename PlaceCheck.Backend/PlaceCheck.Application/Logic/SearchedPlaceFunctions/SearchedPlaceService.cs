@@ -10,7 +10,7 @@ public class SearchedPlaceService : BaseService, ISearchedPlaceService
     {
     }
 
-    public async Task<Guid> SaveSearchedPlaceAsync(string phase)
+    public async Task<Guid> SaveSearchedPlaceAsync(string phase, string city)
     {
         var utcNow = DateTime.UtcNow;
 
@@ -18,6 +18,7 @@ public class SearchedPlaceService : BaseService, ISearchedPlaceService
         {
             Id = Guid.NewGuid(),
             SearchPhase = phase,
+            City = city,          
             InsertedOn = utcNow
         };
         

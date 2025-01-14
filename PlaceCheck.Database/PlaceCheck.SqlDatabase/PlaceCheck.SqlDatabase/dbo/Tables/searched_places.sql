@@ -2,6 +2,7 @@
 (
 	[id] UNIQUEIDENTIFIER NOT NULL,
 	[search_phase] NVARCHAR(MAX) NOT NULL,
+	[city] NVARCHAR(255) NOT NULL,
 	[inserted_on] DATETIMEOFFSET NOT NULL,
 	CONSTRAINT [pk_searched_places] PRIMARY KEY ([id])
 );

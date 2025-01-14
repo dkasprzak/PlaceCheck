@@ -1,4 +1,5 @@
 ﻿using PlaceCheck.Application.DTO;
+using PlaceCheck.Application.Exceptions;
 using PlaceCheck.Application.Interfaces;
 using PlaceCheck.Application.Logic.SearchedPlaceFunctions.Queries;
 using PlaceCheck.Application.Helpers;
@@ -8,22 +9,32 @@ namespace PlaceCheck.Application.Logic.SearchedPlaceFunctions;
 public class PlaceQueryService : IPlaceQueryService
 {
    private readonly IGooglePlacesApiService _googlePlacesApiService;
+   private readonly ISearchedPlaceService _searchedPlaceService;
 
-   public PlaceQueryService(IGooglePlacesApiService googlePlacesApiService)
+   public PlaceQueryService(IGooglePlacesApiService googlePlacesApiService, ISearchedPlaceService searchedPlaceService)
    {
        _googlePlacesApiService = googlePlacesApiService;
+       _searchedPlaceService = searchedPlaceService;
    }
    
    public async Task<IEnumerable<PlaceResponse>> SearchPlaces(SearchQuery query)
    {
-       var placesQuery = await _googlePlacesApiService.SearchPlaces($"{query.SearchPhase} {query.City}");
-  
+       var searchPhase = $"{query.SearchPhase} {query.City}";
+       var placesQuery = await _googlePlacesApiService.SearchPlaces(searchPhase);
+
+       if (placesQuery is null)
+       {
+           throw new NotFoundException("PlacesNotFound");
+       }
+       
        var filters = query.PlaceFilters;
        if (filters is null)
        {
            return placesQuery;
        }
 
+       await _searchedPlaceService.SaveSearchedPlaceAsync(query.SearchPhase, query.City);
+       
        return placesQuery
            .WhereIf(filters.OutdoorSeating.HasValue, x => x.OutdoorSeating == filters.OutdoorSeating!.Value)
            .WhereIf(filters.LiveMusic.HasValue, x => x.LiveMusic == filters.LiveMusic!.Value)

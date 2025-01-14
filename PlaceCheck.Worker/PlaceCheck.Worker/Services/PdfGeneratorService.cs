@@ -22,7 +22,7 @@ public class PdfGeneratorService : IPdfGeneratorService
     
     public async Task GeneratePdf(DateTime date)
     {
-        var outputPath = Path.Combine(_options.PdfReportsPath, $"{date.ToString("yyyyMMdd_HHmmss")}.pdf");
+        var outputPath = Path.Combine(_options.PdfReportsPath, $"{date.ToString("yyyyMMdd")}.pdf");
 
         var data = await _dbContext.SearchedPlaces
             .Where(x => x.InsertedOn.Date == date.Date)
@@ -37,17 +37,19 @@ public class PdfGeneratorService : IPdfGeneratorService
         using (var pdf = new PdfDocument(pdfWriter))
         using (var document = new Document(pdf))
         {
-            var table = new Table(UnitValue.CreatePercentArray([70 ,30]));
+            var table = new Table(UnitValue.CreatePercentArray([50, 30, 20]));
             table.SetWidth(UnitValue.CreatePercentValue(100));
             table.SetPaddingLeft(5);
             table.SetPaddingRight(5);
             
             table.AddHeaderCell("Search Phase").SetPadding(5);
+            table.AddHeaderCell("City").SetPadding(5);
             table.AddHeaderCell("Inserted On").SetPadding(5);
 
             foreach (var p in data)
             {
                 table.AddCell(p.SearchPhase);
+                table.AddCell(p.City);
                 table.AddCell(p.InsertedOn.ToString("dd/MM/yyyy HH:mm:ss"));
                 table.StartNewRow();
             }

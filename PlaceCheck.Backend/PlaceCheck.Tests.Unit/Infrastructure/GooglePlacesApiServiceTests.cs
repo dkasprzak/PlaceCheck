@@ -12,7 +12,6 @@ public class GooglePlacesApiServiceTests
     private readonly HttpClient _httpClient;
     private readonly GooglePlacesApiService _service;
     private readonly IOptions<GooglePlacesApiOptions> _apiOptions;
-    private readonly SearchedPlaceService _searchedPlaceService;
 
     public GooglePlacesApiServiceTests()
     {
@@ -33,7 +32,7 @@ public class GooglePlacesApiServiceTests
         };
 
         // initialize service
-        _service = new GooglePlacesApiService(_httpClient, _apiOptions, _searchedPlaceService);
+        _service = new GooglePlacesApiService(_httpClient, _apiOptions);
     }
     
 }

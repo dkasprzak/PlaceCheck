@@ -16,9 +16,9 @@ public class PlacesController : ControllerBase
     }
     
     [HttpPost]
-    public async Task<ActionResult> GetPlaces([FromBody] SearchQuery command)
+    public async Task<ActionResult> GetPlaces([FromBody] SearchQuery query)
     {
-        var result = await _placeQueryService.SearchPlaces(command);
+        var result = await _placeQueryService.SearchPlaces(query);
         return Ok(result);
     }
 }
