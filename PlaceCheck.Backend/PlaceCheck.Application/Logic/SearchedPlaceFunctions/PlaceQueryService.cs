@@ -19,6 +19,23 @@ public class PlaceQueryService : IPlaceQueryService
    
    public async Task<IEnumerable<PlaceResponse>> SearchPlaces(SearchQuery query)
    {
+       var validator = new SearchQueryValidator();
+       var result = validator.Validate(query);
+
+       if (!result.IsValid)
+       {
+           var validationException = new ValidationException
+           {
+               Errors = result.Errors.Select(error => new ValidationException.FieldError
+               {
+                   FieldName = error.PropertyName,
+                   Error = error.ErrorMessage
+               }).ToList()
+           };
+           
+           throw validationException;
+       }
+       
        var searchPhase = $"{query.SearchPhase} {query.City}";
        var placesQuery = await _googlePlacesApiService.SearchPlaces(searchPhase);
 

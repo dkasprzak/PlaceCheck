@@ -29,6 +29,11 @@ public class ExceptionResultMiddleware
             httpContext.Response.StatusCode = (int)HttpStatusCode.NotFound;
             await httpContext.Response.WriteAsJsonAsync(new NotFoundResponse { Message = e.Message });
         }
+        catch (ValidationException ve)
+        {
+            httpContext.Response.StatusCode = (int)HttpStatusCode.UnprocessableEntity;
+            await httpContext.Response.WriteAsJsonAsync(new ValidatorErrorResponse(ve));
+        }
         catch (ApiException e)
         {
             logger.LogWarning($"API returned error: {e.StatusCode} - {e.ErrorContent}");

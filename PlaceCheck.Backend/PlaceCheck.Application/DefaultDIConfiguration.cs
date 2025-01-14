@@ -1,5 +1,7 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using FluentValidation;
+using Microsoft.Extensions.DependencyInjection;
 using PlaceCheck.Application.Interfaces;
+using PlaceCheck.Application.Logic.Abstarctions;
 using PlaceCheck.Application.Logic.SearchedPlaceFunctions;
 
 namespace PlaceCheck.Application;
