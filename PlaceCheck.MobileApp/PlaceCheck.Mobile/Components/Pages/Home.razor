@@ -5,61 +5,261 @@
 
 @page "/"
 
-<MudPaper Class="pa-2 d-flex align-center" Elevation="3">
-    <MudTextField T="string" Label="Search Places"
-                  @bind-Value="_query"
-                  Variant="Variant.Filled"
-                  Adornment="Adornment.Start"
-                  AdornmentIcon="@Icons.Material.Filled.Search"
-                  Immediate="true"
-                  OnKeyDown="HandleKeyDown"
-                  Class="flex-grow-1" />
-    <MudIconButton Icon="@Icons.Material.Filled.Search"
-                   Color="Color.Primary"
-                   OnClick="PerformSearch"
-                   Edge="Edge.End" />
-</MudPaper>
+<MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="mt-4">
+   <MudGrid>
+       <!-- Search Bar and Filters Section -->
+       <MudItem xs="12">
+           <MudCard Elevation="3">
+               <MudCardContent>
+                   <MudGrid>
+                       <!-- Search Field -->
+                       <MudItem xs="12" sm="6" md="4">
+                           <MudTextField T="string" 
+                                       Label="Search Places"
+                                       @bind-Value="_query.SearchPhase"
+                                       Variant="Variant.Outlined"
+                                       Adornment="Adornment.Start"
+                                       AdornmentIcon="@Icons.Material.Filled.Search"
+                                       Immediate="true"
+                                       OnKeyDown="HandleKeyDown"
+                                       Class="mt-0" />
+                       </MudItem>
 
-    @if (loading)
-    {
-        <PlaceSkeletonLoader/>
-    }
-    else
-    {
-        @foreach (var p in places)
-        {
-            <PlaceSkeleton DisplayName="@p.DisplayName.Text" Rating="@p.Rating"/>
-        }
-    }
+                       <!-- City Dropdown -->
+                       <MudItem xs="12" sm="6" md="4">
+                           <MudSelect @bind-Value="_query.City"
+                                    Label="Select City"
+                                    Variant="Variant.Outlined"
+                                    Dense="false"
+                                    Class="mt-0">
+                               @foreach (var city in _cities)
+                               {
+                                   <MudSelectItem Value="@city">@city</MudSelectItem>
+                               }
+                           </MudSelect>
+                       </MudItem>
+
+                       <!-- Search Button -->
+                       <MudItem xs="12" sm="12" md="4" Class="d-flex align-center">
+                           <MudButton Variant="Variant.Filled" 
+                                    Color="Color.Primary" 
+                                    OnClick="PerformSearch" 
+                                    StartIcon="@Icons.Material.Filled.Search"
+                                    Size="Size.Large"
+                                    FullWidth="true">
+                               Search
+                           </MudButton>
+                       </MudItem>
+
+                       <!-- Debug Info -->
+                       @if (errorMessage != null)
+                       {
+                           <MudItem xs="12">
+                               <MudAlert Severity="Severity.Error" ShowCloseIcon="true" CloseIconClicked="(() => errorMessage = null)">
+                                   @errorMessage
+                               </MudAlert>
+                           </MudItem>
+                       }
+
+                       <!-- Filters Section -->
+                       <MudItem xs="12">
+                           <MudExpansionPanels>
+                               <MudExpansionPanel Text="Additional Filters">
+                                   <MudGrid>
+                                       <MudItem xs="12">
+                                           <MudButton Color="Color.Secondary" 
+                                                     OnClick="ResetFilters" 
+                                                     StartIcon="@Icons.Material.Filled.Clear"
+                                                     Class="mb-3">
+                                               Reset Filters
+                                           </MudButton>
+                                       </MudItem>
+                                       @foreach (var filter in _filters)
+                                       {
+                                           <MudItem xs="12" sm="6" md="4">
+                                               <MudCheckBox T="bool"
+                                                          @bind-Checked="filter.IsSelected"
+                                                          Label="@filter.Label"
+                                                          Color="Color.Primary"/>
+                                           </MudItem>
+                                       }
+                                   </MudGrid>
+                               </MudExpansionPanel>
+                           </MudExpansionPanels>
+                       </MudItem>
+                   </MudGrid>
+               </MudCardContent>
+           </MudCard>
+       </MudItem>
+
+       <!-- Results Section -->
+       <MudItem xs="12">
+           @if (loading)
+           {
+               <PlaceSkeletonLoader/>
+           }
+           else if (places != null && places.Any())
+           {
+               <MudGrid>
+                   @foreach (var p in places)
+                   {
+                       <MudItem xs="12" sm="6" md="4">
+                           <PlaceSkeleton DisplayName="@p.DisplayName.Text" Rating="@p.Rating"/>
+                       </MudItem>
+                   }
+               </MudGrid>
+           }
+           else if (!string.IsNullOrEmpty(_query.SearchPhase))
+           {
+               <MudAlert Severity="Severity.Info">No results found</MudAlert>
+           }
+       </MudItem>
+   </MudGrid>
+</MudContainer>
 
 @code {
-private IEnumerable<PlaceListViewModel> places = Enumerable.Empty<PlaceListViewModel>();
-private string _query;
-private bool loading = false;
+   private IEnumerable<PlaceListViewModel> places = Enumerable.Empty<PlaceListViewModel>();
+   private SearchQuery _query = new();
+   private bool loading = false;
+   private string errorMessage;
 
-    private async Task PerformSearch()
-    {
-        if (!string.IsNullOrWhiteSpace(_query))
-        {
-            loading = true;
-            StateHasChanged();
+   private string[] _cities = {
+       "Warszawa", "Kraków", "Wrocław", "Poznań", "Gdańsk", 
+       "Gdynia", "Sopot", "Toruń", "Białystok"
+   };
 
-            places = await _placeCheckApiService.GetPlaces(_query);
+   private class FilterOption
+   {
+       public string Label { get; set; }
+       public bool IsSelected { get; set; }
+       public string PropertyName { get; set; }
+   }
 
-            loading = false;
-            StateHasChanged();
-        }
-        else
-        {
-            places = Enumerable.Empty<PlaceListViewModel>();
-        }
-    }
+   private List<FilterOption> _filters = new()
+   {
+       new FilterOption { Label = "Outdoor Seating", PropertyName = "OutdoorSeating", IsSelected = false },
+       new FilterOption { Label = "Live Music", PropertyName = "LiveMusic", IsSelected = false },
+       new FilterOption { Label = "Menu For Children", PropertyName = "MenuForChildren", IsSelected = false },
+       new FilterOption { Label = "Serves Cocktails", PropertyName = "ServesCocktails", IsSelected = false },
+       new FilterOption { Label = "Serves Dessert", PropertyName = "ServesDessert", IsSelected = false },
+       new FilterOption { Label = "Serves Coffee", PropertyName = "ServesCoffee", IsSelected = false },
+       new FilterOption { Label = "Good For Children", PropertyName = "GoodForChildren", IsSelected = false },
+       new FilterOption { Label = "Allows Dogs", PropertyName = "AllowsDogs", IsSelected = false },
+       new FilterOption { Label = "Has Restroom", PropertyName = "Restroom", IsSelected = false },
+       new FilterOption { Label = "Good For Groups", PropertyName = "GoodForGroups", IsSelected = false },
+       new FilterOption { Label = "Good For Watching Sports", PropertyName = "GoodForWatchingSports", IsSelected = false },
+       new FilterOption { Label = "Wheelchair Accessible Parking", PropertyName = "WheelchairAccessibleParking", IsSelected = false },
+       new FilterOption { Label = "Wheelchair Accessible Entrance", PropertyName = "WheelchairAccessibleEntrance", IsSelected = false },
+       new FilterOption { Label = "Wheelchair Accessible Restroom", PropertyName = "WheelchairAccessibleRestroom", IsSelected = false },
+       new FilterOption { Label = "Wheelchair Accessible Seating", PropertyName = "WheelchairAccessibleSeating", IsSelected = false }
+   };
 
-    private async Task HandleKeyDown(KeyboardEventArgs e)
-    {
-        if (e.Key == "Enter")
-        {
-            await PerformSearch();
-        }
-    }
+   protected override void OnInitialized()
+   {
+       _query = new SearchQuery
+       {
+           SearchPhase = string.Empty,
+           City = string.Empty,
+           PlaceFilters = new PlaceFilter()
+       };
+   }
+
+   private async Task PerformSearch()
+   {
+       try
+       {
+           if (string.IsNullOrWhiteSpace(_query.SearchPhase))
+           {
+               errorMessage = "Please enter a search term";
+               return;
+           }
+
+           loading = true;
+           errorMessage = null;
+           StateHasChanged();
+
+           UpdatePlaceFilters();
+           
+           places = await _placeCheckApiService.GetPlaces(_query);
+       }
+       catch (Exception ex)
+       {
+           errorMessage = $"Error during search: {ex.Message}";
+           places = Enumerable.Empty<PlaceListViewModel>();
+       }
+       finally
+       {
+           loading = false;
+           StateHasChanged();
+       }
+   }
+
+   private void ResetFilters()
+   {
+       foreach (var filter in _filters)
+       {
+           filter.IsSelected = false;
+       }
+       UpdatePlaceFilters();
+   }
+
+   private void UpdatePlaceFilters()
+   {
+       var filters = new PlaceFilter();
+       
+       if(_filters.First(f => f.PropertyName == "OutdoorSeating").IsSelected)
+           filters.OutdoorSeating = true;
+           
+       if(_filters.First(f => f.PropertyName == "LiveMusic").IsSelected)
+           filters.LiveMusic = true;
+           
+       if(_filters.First(f => f.PropertyName == "MenuForChildren").IsSelected)
+           filters.MenuForChildren = true;
+           
+       if(_filters.First(f => f.PropertyName == "ServesCocktails").IsSelected)
+           filters.ServesCocktails = true;
+           
+       if(_filters.First(f => f.PropertyName == "ServesDessert").IsSelected)
+           filters.ServesDessert = true;
+           
+       if(_filters.First(f => f.PropertyName == "ServesCoffee").IsSelected)
+           filters.ServesCoffee = true;
+           
+       if(_filters.First(f => f.PropertyName == "GoodForChildren").IsSelected)
+           filters.GoodForChildren = true;
+           
+       if(_filters.First(f => f.PropertyName == "AllowsDogs").IsSelected)
+           filters.AllowsDogs = true;
+           
+       if(_filters.First(f => f.PropertyName == "Restroom").IsSelected)
+           filters.Restroom = true;
+           
+       if(_filters.First(f => f.PropertyName == "GoodForGroups").IsSelected)
+           filters.GoodForGroups = true;
+           
+       if(_filters.First(f => f.PropertyName == "GoodForWatchingSports").IsSelected)
+           filters.GoodForWatchingSports = true;
+           
+       if(_filters.First(f => f.PropertyName == "WheelchairAccessibleParking").IsSelected)
+           filters.WheelchairAccessibleParking = true;
+           
+       if(_filters.First(f => f.PropertyName == "WheelchairAccessibleEntrance").IsSelected)
+           filters.WheelchairAccessibleEntrance = true;
+           
+       if(_filters.First(f => f.PropertyName == "WheelchairAccessibleRestroom").IsSelected)
+           filters.WheelchairAccessibleRestroom = true;
+           
+       if(_filters.First(f => f.PropertyName == "WheelchairAccessibleSeating").IsSelected)
+           filters.WheelchairAccessibleSeating = true;
+
+       _query.PlaceFilters = filters;
+   }
+
+   private async Task HandleKeyDown(KeyboardEventArgs e)
+   {
+       if (e.Key == "Enter")
+       {
+           await PerformSearch();
+       }
+   }
 }

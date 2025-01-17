@@ -2,9 +2,9 @@
 
 public record PlaceFilter
 {
-    public bool? OutdoorSeating { get; set; }   
+    public bool? OutdoorSeating { get; set; }
     public bool? LiveMusic { get; set; }
-    public bool? MenuForChildren { get; set; }
+    public bool? MenuForChildren { get; set; } 
     public bool? ServesCocktails { get; set; }
     public bool? ServesDessert { get; set; }
     public bool? ServesCoffee { get; set; }
