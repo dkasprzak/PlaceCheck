@@ -85,10 +85,26 @@ jobs:
 
       - name: Load service configuration
         id: config
+        shell: bash
         run: |
           cd ${{ matrix.path }}
-          source .env
-         
+          if [ -f ".env" ]; then
+            echo "Loading config from .env file"
+            cat .env
+            # Załaduj zmienne z .env
+            export $(cat .env | xargs)
+            # Debug
+            echo "REPO_NAME=$REPO_NAME"
+            echo "IMAGE_VERSION=$IMAGE_VERSION"
+            # Ustaw outputs
+            DOCKER_IMAGE="${{ secrets.DOCKERHUB_USERNAME }}/$REPO_NAME"
+            echo "docker_image=$DOCKER_IMAGE" >> $GITHUB_OUTPUT
+            echo "version=$IMAGE_VERSION" >> $GITHUB_OUTPUT
+            echo "Outputs set: image=$DOCKER_IMAGE, version=$IMAGE_VERSION"
+          else
+            echo "Error: .env file not found in ${{ matrix.path }}"
+            exit 1
+          fi
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
@@ -106,7 +122,7 @@ jobs:
           file: ${{ matrix.dockerfile_path }}
           push: ${{ github.ref == 'refs/heads/main' }}
           tags: |
-            ${{ steps.config.outputs.image }}:${{ steps.config.outputs.version }}
-            ${{ steps.config.outputs.image }}:latest
+            ${{ steps.config.outputs.docker_image }}:${{ steps.config.outputs.version }}
+            ${{ steps.config.outputs.docker_image }}:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
