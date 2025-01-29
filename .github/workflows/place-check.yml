@@ -17,6 +17,8 @@ jobs:
       worker_version: ${{ steps.get_version.outputs.worker_version }}
     steps:
       - uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.PAT_TOKEN }}
       
       - name: Load versions
         id: get_version
@@ -59,8 +61,8 @@ jobs:
       - name: Commit version changes
         if: github.ref == 'refs/heads/main'
         run: |
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
           git add "PlaceCheck.Backend/.env" "PlaceCheck.Worker/.env"
           git commit -m "Bump version [skip ci]" || echo "No changes to commit"
           git push
