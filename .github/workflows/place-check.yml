@@ -75,10 +75,10 @@ jobs:
         include:
           - service: backend
             path: PlaceCheck.Backend
-            dockerfile: PlaceCheck.Backend/Dockerfile
+            dockerfile_path: PlaceCheck.Backend/PlaceCheck.WebApi/Dockerfile
           - service: worker
             path: PlaceCheck.Worker
-            dockerfile: PlaceCheck.Worker/Dockerfile
+            dockerfile_path: PlaceCheck.Worker/PlaceCheck.Worker/Dockerfile
     
     steps:
       - uses: actions/checkout@v3
@@ -103,11 +103,9 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v4
         with:
-          context: ./${{ matrix.path }}
-          file: ${{ matrix.dockerfile }}
+          context: ${{ matrix.path }}
+          file: ${{ matrix.dockerfile_path }}
           push: ${{ github.ref == 'refs/heads/main' }}
-          tags: |
-            ${{ steps.config.outputs.image }}:latest
-            ${{ steps.config.outputs.image }}:${{ steps.config.outputs.version }}
+          tags: ${{ steps.config.outputs.image }}:latest,${{ steps.config.outputs.image }}:${{ steps.config.outputs.version }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
