@@ -19,45 +19,69 @@ jobs:
       - uses: actions/checkout@v3
         with:
           token: ${{ secrets.PAT_TOKEN }}
+          fetch-depth: 0
       
-      - name: Load versions
+      - name: Get changed files
+        id: changed-files
+        uses: tj-actions/changed-files@v40
+        with:
+          files_yaml: |
+            backend:
+              - 'PlaceCheck.Backend/**'
+            worker:
+              - 'PlaceCheck.Worker/**'
+
+      - name: Debug file changes
+        run: |
+          echo "Modified backend files:"
+          echo "${{ steps.changed-files.outputs.backend_all_modified_files }}"
+          echo "Modified worker files:"
+          echo "${{ steps.changed-files.outputs.worker_all_modified_files }}"
+      
+      - name: Load and update versions
         id: get_version
         run: |
-          # Load Backend version
-          if [ -f "PlaceCheck.Backend/.env" ]; then
-            source PlaceCheck.Backend/.env
-            echo "backend_version=${IMAGE_VERSION}" >> $GITHUB_OUTPUT
-            echo "backend_repo=${REPO_NAME}" >> $GITHUB_OUTPUT
-          fi
-          
-          # Load Worker version
-          if [ -f "PlaceCheck.Worker/.env" ]; then
-            source PlaceCheck.Worker/.env
-            echo "worker_version=${IMAGE_VERSION}" >> $GITHUB_OUTPUT
-            echo "worker_repo=${REPO_NAME}" >> $GITHUB_OUTPUT
-          fi
-
-      - name: Increment patch version on main
-        if: github.ref == 'refs/heads/main'
-        run: |
-          # Update Backend version if changed
-          if git diff --name-only HEAD^ HEAD | grep -q "^PlaceCheck.Backend/"; then
+          # Backend version update
+          if [[ -n "${{ steps.changed-files.outputs.backend_all_modified_files }}" ]]; then
+            echo "Changes detected in Backend"
             cd PlaceCheck.Backend
             CURRENT_VERSION=$(grep IMAGE_VERSION .env | cut -d'=' -f2)
+            echo "Current Backend version: $CURRENT_VERSION"
             NEW_VERSION="v$(echo ${CURRENT_VERSION#v} | awk -F. '{$NF = $NF + 1;} 1' | sed 's/ /./g')"
+            echo "New Backend version: $NEW_VERSION"
             sed -i "s/IMAGE_VERSION=.*/IMAGE_VERSION=$NEW_VERSION/" .env
+            echo "backend_version=$NEW_VERSION" >> $GITHUB_OUTPUT
             cd ..
+          else
+            echo "No changes in Backend"
+            CURRENT_VERSION=$(grep IMAGE_VERSION PlaceCheck.Backend/.env | cut -d'=' -f2)
+            echo "backend_version=$CURRENT_VERSION" >> $GITHUB_OUTPUT
           fi
           
-          # Update Worker version if changed
-          if git diff --name-only HEAD^ HEAD | grep -q "^PlaceCheck.Worker/"; then
+          # Worker version update
+          if [[ -n "${{ steps.changed-files.outputs.worker_all_modified_files }}" ]]; then
+            echo "Changes detected in Worker"
             cd PlaceCheck.Worker
             CURRENT_VERSION=$(grep IMAGE_VERSION .env | cut -d'=' -f2)
+            echo "Current Worker version: $CURRENT_VERSION"
             NEW_VERSION="v$(echo ${CURRENT_VERSION#v} | awk -F. '{$NF = $NF + 1;} 1' | sed 's/ /./g')"
+            echo "New Worker version: $NEW_VERSION"
             sed -i "s/IMAGE_VERSION=.*/IMAGE_VERSION=$NEW_VERSION/" .env
+            echo "worker_version=$NEW_VERSION" >> $GITHUB_OUTPUT
             cd ..
+          else
+            echo "No changes in Worker"
+            CURRENT_VERSION=$(grep IMAGE_VERSION PlaceCheck.Worker/.env | cut -d'=' -f2)
+            echo "worker_version=$CURRENT_VERSION" >> $GITHUB_OUTPUT
           fi
-          
+
+          # Show final versions
+          echo "Final .env contents:"
+          echo "Backend .env:"
+          cat PlaceCheck.Backend/.env
+          echo "Worker .env:"
+          cat PlaceCheck.Worker/.env
+
       - name: Commit version changes
         if: github.ref == 'refs/heads/main'
         run: |
@@ -75,10 +99,10 @@ jobs:
         include:
           - service: backend
             path: PlaceCheck.Backend
-            dockerfile_path: PlaceCheck.Backend/PlaceCheck.WebApi/Dockerfile
+            dockerfile_path: ./PlaceCheck.Backend/PlaceCheck.WebApi/Dockerfile
           - service: worker
             path: PlaceCheck.Worker
-            dockerfile_path: PlaceCheck.Worker/PlaceCheck.Worker/Dockerfile
+            dockerfile_path: ./PlaceCheck.Worker/PlaceCheck.Worker/Dockerfile
     
     steps:
       - uses: actions/checkout@v3
@@ -91,19 +115,15 @@ jobs:
           if [ -f ".env" ]; then
             echo "Loading config from .env file"
             cat .env
-            # Załaduj zmienne z .env
             export $(cat .env | xargs)
-            # Konstruuj nazwę obrazu
             DOCKER_IMAGE="${{ secrets.DOCKERHUB_USERNAME }}/$REPO_NAME"
-            # Wyczyść potencjalne białe znaki
             DOCKER_IMAGE=$(echo "$DOCKER_IMAGE" | tr -d '[:space:]')
-            IMAGE_VERSION=$(echo "$IMAGE_VERSION" | tr -d '[:space:]')
-            # Debug
-            echo "Docker image: $DOCKER_IMAGE"
-            echo "Version: $IMAGE_VERSION"
-            # Ustaw outputs
             echo "docker_image=$DOCKER_IMAGE" >> $GITHUB_OUTPUT
-            echo "version=$IMAGE_VERSION" >> $GITHUB_OUTPUT
+            if [ "${{ matrix.service }}" = "backend" ]; then
+              echo "version=${{ needs.version.outputs.backend_version }}" >> $GITHUB_OUTPUT
+            else
+              echo "version=${{ needs.version.outputs.worker_version }}" >> $GITHUB_OUTPUT
+            fi
           else
             echo "Error: .env file not found in ${{ matrix.path }}"
             exit 1
