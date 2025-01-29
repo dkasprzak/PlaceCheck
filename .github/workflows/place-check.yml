@@ -93,14 +93,17 @@ jobs:
             cat .env
             # Załaduj zmienne z .env
             export $(cat .env | xargs)
-            # Debug
-            echo "REPO_NAME=$REPO_NAME"
-            echo "IMAGE_VERSION=$IMAGE_VERSION"
-            # Ustaw outputs
+            # Konstruuj nazwę obrazu
             DOCKER_IMAGE="${{ secrets.DOCKERHUB_USERNAME }}/$REPO_NAME"
+            # Wyczyść potencjalne białe znaki
+            DOCKER_IMAGE=$(echo "$DOCKER_IMAGE" | tr -d '[:space:]')
+            IMAGE_VERSION=$(echo "$IMAGE_VERSION" | tr -d '[:space:]')
+            # Debug
+            echo "Docker image: $DOCKER_IMAGE"
+            echo "Version: $IMAGE_VERSION"
+            # Ustaw outputs
             echo "docker_image=$DOCKER_IMAGE" >> $GITHUB_OUTPUT
             echo "version=$IMAGE_VERSION" >> $GITHUB_OUTPUT
-            echo "Outputs set: image=$DOCKER_IMAGE, version=$IMAGE_VERSION"
           else
             echo "Error: .env file not found in ${{ matrix.path }}"
             exit 1
@@ -117,12 +120,13 @@ jobs:
 
       - name: Build and push
         uses: docker/build-push-action@v4
+        env:
+          DOCKER_IMAGE: ${{ steps.config.outputs.docker_image }}
+          VERSION: ${{ steps.config.outputs.version }}
         with:
           context: .
           file: ${{ matrix.dockerfile_path }}
           push: ${{ github.ref == 'refs/heads/main' }}
-          tags: |
-            ${{ steps.config.outputs.docker_image }}:${{ steps.config.outputs.version }}
-            ${{ steps.config.outputs.docker_image }}:latest
+          tags: "${{ steps.config.outputs.docker_image }}:${{ steps.config.outputs.version }},${{ steps.config.outputs.docker_image }}:latest"
           cache-from: type=gha
           cache-to: type=gha,mode=max
