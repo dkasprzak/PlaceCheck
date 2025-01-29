@@ -118,14 +118,29 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build and push
+      - name: Build and push Backend
+        if: matrix.service == 'backend'
         uses: docker/build-push-action@v4
         env:
           DOCKER_IMAGE: ${{ steps.config.outputs.docker_image }}
           VERSION: ${{ steps.config.outputs.version }}
         with:
-          context: .
-          file: ${{ matrix.dockerfile_path }}
+          context: ./PlaceCheck.Backend
+          file: ./PlaceCheck.Backend/PlaceCheck.WebApi/Dockerfile
+          push: ${{ github.ref == 'refs/heads/main' }}
+          tags: "${{ steps.config.outputs.docker_image }}:${{ steps.config.outputs.version }},${{ steps.config.outputs.docker_image }}:latest"
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Build and push Worker
+        if: matrix.service == 'worker'
+        uses: docker/build-push-action@v4
+        env:
+          DOCKER_IMAGE: ${{ steps.config.outputs.docker_image }}
+          VERSION: ${{ steps.config.outputs.version }}
+        with:
+          context: ./PlaceCheck.Worker
+          file: ./PlaceCheck.Worker/PlaceCheck.Worker/Dockerfile
           push: ${{ github.ref == 'refs/heads/main' }}
           tags: "${{ steps.config.outputs.docker_image }}:${{ steps.config.outputs.version }},${{ steps.config.outputs.docker_image }}:latest"
           cache-from: type=gha
