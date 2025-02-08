@@ -15,11 +15,11 @@ Log.Logger = new LoggerConfiguration()
 
 Log.Logger = new LoggerConfiguration()
     .MinimumLevel.Information()
+    .WriteTo.Console()
     .WriteTo.GrafanaLoki(
         "http://monitoring_loki:3100",
         labels: new[] { 
-            new LokiLabel { Key = "container", Value = "pc_backend" },
-            new LokiLabel { Key = "service", Value = "pc_backend" }
+            new LokiLabel { Key = "container", Value = "pc_backend" }
         })
     .CreateLogger();
 
