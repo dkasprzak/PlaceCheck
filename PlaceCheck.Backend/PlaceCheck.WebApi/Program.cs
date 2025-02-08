@@ -31,7 +31,7 @@ Log.Logger = new LoggerConfiguration()
     .MinimumLevel.Information()
     .WriteTo.Console()
     .WriteTo.GrafanaLoki(
-        "http://monitoring_loki:3100",
+        "http://monitoring_loki:3100/loki/api/v1/push", 
         labels: new[] { 
             new LokiLabel { Key = "container", Value = "backend_pc_backend" },
             new LokiLabel { Key = "service", Value = "place_check" }
