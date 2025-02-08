@@ -3,6 +3,18 @@ using PlaceCheck.Worker;
 using PlaceCheck.Worker.Configuration;
 using PlaceCheck.Worker.Interfaces;
 using PlaceCheck.Worker.Services;
+using Serilog;
+using Serilog.Sinks.Grafana.Loki;
+
+Log.Logger = new LoggerConfiguration()
+    .MinimumLevel.Information()
+    .WriteTo.GrafanaLoki(
+        "http://monitoring_loki:3100",
+        labels: new[] { 
+            new LokiLabel { Key = "app", Value = "pc_worker" },
+            new LokiLabel { Key = "environment", Value = "production" }
+        })
+    .CreateLogger();
 
 var builder = Host.CreateApplicationBuilder(args);
 

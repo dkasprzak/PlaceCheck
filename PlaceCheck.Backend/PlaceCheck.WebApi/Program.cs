@@ -2,6 +2,7 @@ using PlaceCheck.Application;
 using PlaceCheck.Infrastructure;
 using PlaceCheck.WebApi.Middlewares;
 using Serilog;
+using Serilog.Sinks.Grafana.Loki;
 
 var APP_NAME = "PlaceCheck.WebApi";
 
@@ -11,6 +12,16 @@ Log.Logger = new LoggerConfiguration()
     .Enrich.FromLogContext()
     .WriteTo.Console()
     .CreateBootstrapLogger();
+
+Log.Logger = new LoggerConfiguration()
+    .MinimumLevel.Information()
+    .WriteTo.GrafanaLoki(
+        "http://monitoring_loki:3100",
+        labels: new[] { 
+            new LokiLabel { Key = "app", Value = "pc_backend" },
+            new LokiLabel { Key = "environment", Value = "production" }
+        })
+    .CreateLogger();
 
 var builder = WebApplication.CreateBuilder(args);
 
