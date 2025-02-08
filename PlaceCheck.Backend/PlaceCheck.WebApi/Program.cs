@@ -18,8 +18,8 @@ Log.Logger = new LoggerConfiguration()
     .WriteTo.GrafanaLoki(
         "http://monitoring_loki:3100",
         labels: new[] { 
-            new LokiLabel { Key = "app", Value = "pc_backend" },
-            new LokiLabel { Key = "environment", Value = "production" }
+            new LokiLabel { Key = "container", Value = "pc_backend" },
+            new LokiLabel { Key = "service", Value = "pc_backend" }
         })
     .CreateLogger();
 
