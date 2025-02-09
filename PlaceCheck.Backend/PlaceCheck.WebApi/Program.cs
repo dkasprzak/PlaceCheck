@@ -23,21 +23,19 @@ var APP_NAME = "PlaceCheck.WebApi";
 //             new LokiLabel { Key = "service", Value = "place_check" }
 //         })
 //     .CreateLogger();
-
 Log.Logger = new LoggerConfiguration()
     .Enrich.WithProperty("Application", APP_NAME)
     .Enrich.WithProperty("MachineName", Environment.MachineName)
     .Enrich.FromLogContext()
-    .MinimumLevel.Information()
-    .WriteTo.Console()
+    .MinimumLevel.Debug()
+    .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj} {Properties:j}{NewLine}{Exception}")
     .WriteTo.GrafanaLoki(
-        "http://monitoring_loki:3100/loki/api/v1/push", 
+        "http://monitoring_loki:3100", 
         labels: new[] { 
             new LokiLabel { Key = "container", Value = "backend_pc_backend" },
             new LokiLabel { Key = "service", Value = "place_check" }
         })
     .CreateLogger();
-
 var builder = WebApplication.CreateBuilder(args);
 
 if (builder.Environment.IsDevelopment())
