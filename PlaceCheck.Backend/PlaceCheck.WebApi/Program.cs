@@ -28,6 +28,7 @@ Log.Logger = new LoggerConfiguration()
     .Enrich.WithProperty("MachineName", Environment.MachineName)
     .Enrich.FromLogContext()
     .MinimumLevel.Debug()
+    .WriteTo.Debug()
     .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj} {Properties:j}{NewLine}{Exception}")
     .WriteTo.GrafanaLoki(
         "http://monitoring_loki:3100", 
@@ -36,6 +37,7 @@ Log.Logger = new LoggerConfiguration()
             new LokiLabel { Key = "service", Value = "place_check" }
         })
     .CreateLogger();
+
 var builder = WebApplication.CreateBuilder(args);
 
 if (builder.Environment.IsDevelopment())
@@ -84,3 +86,4 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.MapControllers();
 app.Run();
+Log.CloseAndFlush();
