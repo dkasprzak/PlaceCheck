@@ -23,6 +23,12 @@ var APP_NAME = "PlaceCheck.WebApi";
 //             new LokiLabel { Key = "service", Value = "place_check" }
 //         })
 //     .CreateLogger();
+
+
+var builder = WebApplication.CreateBuilder(args);
+
+Log.Information("Application Starting");
+
 Log.Logger = new LoggerConfiguration()
     .Enrich.WithProperty("Application", APP_NAME)
     .Enrich.WithProperty("MachineName", Environment.MachineName)
@@ -38,19 +44,17 @@ Log.Logger = new LoggerConfiguration()
         })
     .CreateLogger();
 
-var builder = WebApplication.CreateBuilder(args);
-
 if (builder.Environment.IsDevelopment())
 {
     builder.Configuration.AddJsonFile("appsettings.Development.local.json");
 }
 
-builder.Host.UseSerilog((context, services, configuration) => configuration
-    .Enrich.WithProperty("Application", APP_NAME)
-    .Enrich.WithProperty("MachineName", Environment.MachineName)
-    .ReadFrom.Configuration(context.Configuration)
-    .ReadFrom.Services(services)
-    .Enrich.FromLogContext());
+// builder.Host.UseSerilog((context, services, configuration) => configuration
+//     .Enrich.WithProperty("Application", APP_NAME)
+//     .Enrich.WithProperty("MachineName", Environment.MachineName)
+//     .ReadFrom.Configuration(context.Configuration)
+//     .ReadFrom.Services(services)
+//     .Enrich.FromLogContext());
 
 // Add services to the container.
 builder.Services.AddControllers();
@@ -86,4 +90,3 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.MapControllers();
 app.Run();
-Log.CloseAndFlush();
